@@ -1,0 +1,9 @@
+# Ignoro dir con env Anaconda
+jwt_rsa
+# Ignoro file di compilazione
+__pycache__
+# Ignoro file di configurazione di Visual Studio Code
+.DS_Store
+.vscode
+# Ignoro il db
+jwt_app.db
