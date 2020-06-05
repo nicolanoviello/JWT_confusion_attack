@@ -1,0 +1,1 @@
+HMAC-SHA256(/bin/ps)= ad6f7a88496f1cf52230507d4e9a4beb61e0937d642d6f1d7adc2ac41219ab8e

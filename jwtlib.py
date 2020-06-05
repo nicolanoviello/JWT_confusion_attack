@@ -3,8 +3,8 @@ from flask import request, Response
 import json
 import jwt 
 
-signing_key="abcd"
-
+private_key = open('mykey.pem').read()
+public_key = open('pubkey.pem').read()
 def encode_auth_token(utenteloggato):
     try:
         if  utenteloggato.ruolo == 'abcde':
@@ -21,8 +21,8 @@ def encode_auth_token(utenteloggato):
             payload = {
                 'username': utenteloggato.username
             }
-        jwt_encoded = jwt.encode(payload,signing_key,algorithm='HS256')
-        return jwt_encoded.decode()
+        jwt_encoded = jwt.encode(payload, private_key, algorithm='RS256')
+        return jwt_encoded.decode('utf-8')
     except Exception as e:
         return e
 
@@ -46,7 +46,9 @@ def requires_auth(f):
 def decode_auth_token(token):
     try:
         token = token.replace("Bearer ",'')
-        message_received = jwt.decode(token, signing_key, algorithms=['HS256'])
+        #message_received = jwt.decode(token, signing_key, algorithms=['HS256'])
+        #message_received = jwt.decode(token, public_key, algorithms=['RS256'])
+        message_received = jwt.decode(token, public_key)
         return(message_received)
     except Exception as e:
         return e
