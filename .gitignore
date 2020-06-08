@@ -1,7 +1,7 @@
 # Ignoro dir con env Anaconda
 jwt_rsa
 # Escludo la cartella jwt
-!jwt_rsa/lib/python3.7/site-packages/jwt
+!jwt_rsa/lib/python3.7/site-packages/jwt/algorithms.py
 # Ignoro file di compilazione
 __pycache__
 # Ignoro file di configurazione di Visual Studio Code
