@@ -22,7 +22,7 @@ def encode_auth_token(utenteloggato):
                 'username': utenteloggato.username
             }
         # jwt_encoded = jwt.encode(payload, private_key, algorithm='RS256')
-        jwt_encoded = jwt.encode(payload, private_key)
+        jwt_encoded = jwt.encode(payload, private_key,algorithm='RS256')
         return jwt_encoded.decode('utf-8')
     except Exception as e:
         return e
