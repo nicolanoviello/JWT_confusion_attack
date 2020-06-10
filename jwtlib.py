@@ -10,12 +10,12 @@ def encode_auth_token(utenteloggato):
         if  utenteloggato.ruolo == 'abcde':
             payload = {
             'username': utenteloggato.username,
-            'role': 'root'
+            'role': 'abcde'
             }
         elif utenteloggato.ruolo == 'root':
             payload = {
             'username': utenteloggato.username,
-            'role': 'fake_root'
+            'role': 'root'
             }
         else:
             payload = {
