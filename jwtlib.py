@@ -1,10 +1,11 @@
 from functools import wraps
 from flask import request, Response
 import json
-import jwt 
+import jwt
 
 private_key = open('mykey.pem').read()
 public_key = open('pubkey.pem').read()
+algo='RS256'
 def encode_auth_token(utenteloggato):
     try:
         if  utenteloggato.ruolo == 'abcde':
@@ -22,7 +23,7 @@ def encode_auth_token(utenteloggato):
                 'username': utenteloggato.username
             }
         # jwt_encoded = jwt.encode(payload, private_key, algorithm='RS256')
-        jwt_encoded = jwt.encode(payload, private_key,algorithm='RS256')
+        jwt_encoded = jwt.encode(payload, private_key,algorithm=algo)
         return jwt_encoded.decode('utf-8')
     except Exception as e:
         return e
@@ -47,9 +48,10 @@ def requires_auth(f):
 def decode_auth_token(token):
     try:
         token = token.replace("Bearer ",'')
-        #message_received = jwt.decode(token, signing_key, algorithms=['HS256'])
-        #message_received = jwt.decode(token, public_key, algorithms=['RS256'])
-        message_received = jwt.decode(token, public_key)
-        return(message_received)
+        header = jwt.utils.base64url_decode(token[:token.index(".")]).decode("utf-8")
+        json_header = json.loads(header)['alg']
+        if json_header == algo:
+            message_received = jwt.decode(token, public_key)
+            return(message_received)
     except Exception as e:
         return e
