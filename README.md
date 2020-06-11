@@ -235,9 +235,23 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIiw
  
 ## Conclusioni
 
+Nelle buone pratiche di JWT è richiesta sempre una verifica riguardante i campi dell'Header e del Payload, specialmente  se riguardano aspetti legati alla sicurezza delle informazioni. Inoltre l'utilizzo di chiavi nel Payload eccessivamente "parlanti" può agevolare un ipotetico attaccante nell'individuazione di chiavi critiche per la sicurezza. È buona norma blindare le librerie e vincolarne l'uso esclusivamente al caso d'uso che si vuole applicare.
 
+Specialmente per questo tipo di attacco, dove - non nel caso di questo specifico progetto - una chiave pubblica è facilmente acquisibile con un semplice comando del tipo
 
+```
+$ openssl s_client -connect the.host.name:443 | openssl x509 -pubkey -noout
+```
+è necessario che siano sempre verificati in fase di analisi del token i dati relativi all'Header.
 
-cat pubkey.pem | xxd -p | tr -d "\\n" > myhmac.txt
+Per quanto riguarda la decodifica della chiave, nel nostro esempio è bastato semplicemente usare il contenuto della public key, ma in altri casi ad esempio potrà essere necessario codificare in esadecimale il contenuto
 
-openssl dgst -sha256 -hmac -hex -macopt hexkey:\$(cat myhmac.txt) -out hmac.txt /bin/ps
+```
+$ cat pubkey.pem | xxd -p | tr -d "\\n" > myhmac.txt
+
+$ openssl dgst -sha256 -hmac -hex -macopt hexkey:\$(cat myhmac.txt) -out hs256.txt
+```
+questo ovviamente cambia da libreria a libreria.
+
+Nello specifico, questo tipo di attacchi (e le relative buone pratiche per difendersi) necessitano un'accurata analisi delle librerie da utilizzare e dei sistemi standard di codifica.
+È importante, a prescindere dalla chiave, valutare anche il tipo di errore che restituisce il server, così da mascherarne il dettaglio ad un possibile attaccante.
