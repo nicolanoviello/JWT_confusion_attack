@@ -22,7 +22,7 @@ class UserModel(db.Model):
             return {
                 'username': x.username,
                 'password': x.password,
-                'ruolo': x.ruolo
+                'role': x.ruolo
                  }
         return {'Utenti': list(map(lambda x: to_json(x), UserModel.query.all()))}
 
