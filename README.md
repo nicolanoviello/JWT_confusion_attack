@@ -6,9 +6,9 @@ Componente software in grado simulare un attacco di tipo key confusion/algorithm
 
 ## Creazione dell'environment per l'installazione del progetto
 
-- Il primo step prevede l'installazione di [Anaconda](https://www.anaconda.com/products/individual) disponibile per i principali sistemi operativi. Anaconda permette di creare ambienti python virtuali senza alterare le installazioni presenti sul sistema operativo principale
+- Il primo step prevede l'installazione di [Python](https://www.python.org/) e di [Virtualenv](https://virtualenv.pypa.io/en/latest/installation.html) disponibile per i principali sistemi operativi. Virtualenv permette di creare ambienti python virtuali senza alterare le installazioni presenti sul sistema operativo principale
 
-- Una volta installato Anaconda si può procedere all'attivazione dell'ambiente e all'installazione delle componenti necessarie
+- Una volta installato Virtualenv si può procedere all'attivazione dell'ambiente e all'installazione delle componenti necessarie
 
 ```
 # Si crea una directory per il progetto
@@ -42,7 +42,7 @@ $ source jwt_rsa/bin/activate
 - Per lanciare il server è necessario eseguire questo comando
 
 ```
-(jwt_none) $ FLASK_APP=start.py FLASK_DEBUG=1 flask run
+(jwt_rsa) $ FLASK_APP=start.py FLASK_DEBUG=1 flask run
 ```
 ## Funzionamento del progetto
 
@@ -97,7 +97,7 @@ Il software implementato provvede ad esporre su *localhost*, sulla porta 3000, q
   ```
  {
     "message": "Hai effettuato l'accesso come studente_semplice",
-    "auth_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSJ9.MerWIMtpam34E_oVk5vos7i1XsgHhJDGxqe2yxo2r40"
+    "auth_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIn0.XaI0mi79GAGZdxX5fU7EbuUtYTTcVElV5Z2g-XHsyk5rlv7TnFCIq8INVGELvwhVTRrCCVaSfg3l04fn6-tpogP19TH85QYz7iCVVlSw-8NWdcZKBdmO4YqCTdSqS8x-DazxYrXBTU77jIM-_zq3ZCjcEJ5xKLlh8COJjtWx2jA"
 }
   ```
   Il valore della chiave *auth_token* è il nostro JWT
@@ -114,26 +114,26 @@ Il software implementato provvede ad esporre su *localhost*, sulla porta 3000, q
 
  La prima parte del JWT è quella che riguarda l'Header, dove viene specificato l'algoritmo di codifica
  ```
- eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9
  ```
  Decodificando questa parte otteniamo questo JSON
  ```
  {
   "typ": "JWT",
-  "alg": "HS256"
-  }
+  "alg": "RS256"
+}
  ```
- Come si può notare, nella chiave *alg* è chiaramente specificato l'algoritmo di codifica *HS256*
+ Come si può notare, nella chiave *alg* è chiaramente specificato l'algoritmo di codifica *RS256* , questo vuol dire che il Token è generato attraverso l'uso di chiavi pubbliche/private. Durante la codifica il Token viene generato con la chiave privata mentre per la decodifica viene usata la chiave pubblica.
  
  Procediamo quindi ad analizzare la seconda parte del JWT, quella che contiene il payload
  ```
- eyJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSJ9
+ eyJ1c2VybmFtZSI6InN0dWRlbnRlX3NlbXBsaWNlIn0
  ```
  Decodificando questa parte otteniamo questo JSON
  ```
  {
   "username": "studente_semplice"
-  }
+}
  ```
  Di fatto dovremmo modificare il payload per provare ad ottenere la bandiera
  
@@ -152,9 +152,9 @@ Il software implementato provvede ad esporre su *localhost*, sulla porta 3000, q
  ```
  Il nuovo JWT sarà quindi
  ```
- eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJyb290Igp9.MerWIMtpam34E_oVk5vos7i1XsgHhJDGxqe2yxo2r40
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.ewogICJ1c2VybmFtZSI6ICJzdHVkZW50ZV9zZW1wbGljZSIsCiAicnVvbG8iOiJyb290Igp9.XaI0mi79GAGZdxX5fU7EbuUtYTTcVElV5Z2g-XHsyk5rlv7TnFCIq8INVGELvwhVTRrCCVaSfg3l04fn6-tpogP19TH85QYz7iCVVlSw-8NWdcZKBdmO4YqCTdSqS8x-DazxYrXBTU77jIM-_zq3ZCjcEJ5xKLlh8COJjtWx2jA
  ```
- Se proviamo a chiamare l'endpoint */scopriruolo* con questo JWT il server non sarà in grado di verificare la firma e restituirà un errore di tipo *JWTDecodeError*
+ Se proviamo a chiamare l'endpoint */scopriruolo* con questo JWT il server non sarà in grado di verificare la firma e restituirà un errore di tipo *DecodeError*
  
 **5) L'attacco**
 
