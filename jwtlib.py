@@ -48,6 +48,7 @@ def requires_auth(f):
 def decode_auth_token(token):
     try:
         token = token.replace("Bearer ",'')
+        # Integrazione fix
         header = jwt.utils.base64url_decode(token[:token.index(".")]).decode("utf-8")
         json_header = json.loads(header)['alg']
         if json_header == algo:
